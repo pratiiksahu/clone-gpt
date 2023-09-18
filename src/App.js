@@ -9,22 +9,53 @@ import sendBtn from './assets/send.svg';
 import userIcon from './assets/user-icon.png';
 import gptImgLogo from './assets/chatgptLogo.svg';
 import { sendMsgToOpenAI } from './openai';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function App() {
+  const msgEnd = useRef(null)
   const [input, setInput] = useState("")
   const [messages, setMessages] = useState([
     {
-      text: "Hi, I am ChatGPT, a state-of-the-art language model developed by OpenAI. I'm designed to understand and generate human-like text based on the input I receive. You can ask me questions, have conversations, seek information, or even request assistance with various tasks. Just let me know how I can help you!",
+      text: "Hi, I am ChatGPT, a state of the art language model developed by OpenAI. I'm designed to understand and generate human-like text based on the input I receive. You can ask me questions, have conversations, seek information, or even request assistance with various tasks. Just let me know how I can help you!",
       isBot: true
     }
   ])
 
+  useEffect(() => {
+    msgEnd.current.scrollIntoView()
+  }, [messages])
+
   const handleSend = async () => {
-    const res = sendMsgToOpenAI(input)
+    const text = input 
+    setInput('')
     setMessages([
       ...messages,
-      { text: input, isBot: false},
+      {text, isBot: false}
+    ])
+    const res = await sendMsgToOpenAI(text)
+    setMessages([
+      ...messages,
+      { text, isBot: false},
+      { text: res, isBot: true}
+    ])
+  }
+
+  const handleEnter = async (e) => {
+    if (e.key === 'Enter') 
+      await handleSend();
+  }
+
+  const handleQuery = async (e) => {
+    const text = e.target.value 
+    setInput('')
+    setMessages([
+      ...messages,
+      {text, isBot: false}
+    ])
+    const res = await sendMsgToOpenAI(text)
+    setMessages([
+      ...messages,
+      { text, isBot: false},
       { text: res, isBot: true}
     ])
   }
@@ -36,10 +67,10 @@ function App() {
           <div className="upperSideTop">
             <img src={gptLogo} alt="Logo" className="logo"/><span className="brand">ChatGPT</span>
           </div>
-          <button className="midBtn"><img src={addBtn} alt="new chat" className="addBtn" />New Chat</button>
+          <button className="midBtn" onClick={window.location.reload()}><img src={addBtn} alt="new chat" className="addBtn" />New Chat</button>
           <div className="upperSideBottom">
-            <button className="query"><img src={msgIcon} alt="Query" />What is programming?</button>
-            <button className="query"><img src={msgIcon} alt="Query" />How to use an API?</button>
+            <button className="query" onClick={handleQuery} value={"What is programming?"}><img src={msgIcon} alt="Query" />What is programming?</button>
+            <button className="query" onClick={handleQuery} value={"How to use Api?"}><img src={msgIcon} alt="Query" />How to use an API?</button>
           </div>
         </div>
         <div className="lowerSide">
@@ -62,18 +93,20 @@ function App() {
               <img className='chatImg' src={message.isBot?gptImgLogo:userIcon} alt="" /><p className="txt">{message.text}</p>
             </div>
           )}
-          <div className="chatFooter">
+          <div ref={msgEnd}/>
+        </div>
+        <div className="chatFooter">
             <div className="inp">
                 <input 
                   type="text" 
                   placeholder='Send a message' 
                   value={input} 
                   onChange={(e) => {setInput(e.target.value)}}
+                  onKeyDown={handleEnter}
                 /><button className="send" onClick={handleSend}><img src={sendBtn} alt="Send" /></button>
             </div>
-            <p>ChatGPT may produce inaccrate informatino about people or facts</p>
+            <p>ChatGPT may produce inacurate information about people or facts</p>
           </div>
-        </div>
       </div>
     </div>
   );

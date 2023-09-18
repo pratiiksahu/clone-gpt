@@ -159,10 +159,6 @@ body {
 /* fixing chat footer */
 .chatFooter {
   margin-top: auto;
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  margin-left: 17.5rem;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -195,3 +191,7 @@ body {
   margin: 2rem 0;
 }
 
+.txt {
+  line-height: 2.4rem;
+  color: rgba(222, 222, 222, 1)
+}
